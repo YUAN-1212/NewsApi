@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
+﻿using Application.Home;
 using System.Web.Mvc;
 
 namespace NewsApi.Controllers
@@ -13,18 +10,30 @@ namespace NewsApi.Controllers
             return View();
         }
 
-        public ActionResult About()
+        /// <summary>
+        /// 取得下拉式選單資料
+        /// </summary>
+        /// <param name="currency">以哪國貨幣為基準，初始或是空值時以台灣TWD為準</param>
+        /// <returns></returns>
+        [HttpPost]
+        public JsonResult getDDLCurrencyData()
         {
-            ViewBag.Message = "Your application description page.";
+            var data = EFHomeRepository.getCurrencyDto();
 
-            return View();
+            return Json(data, JsonRequestBehavior.AllowGet);
         }
 
-        public ActionResult Contact()
-        {
-            ViewBag.Message = "Your contact page.";
+        /// <summary>
+        /// 取得資料
+        /// </summary>
+        /// <param name="currency">以哪國貨幣為基準，初始或是空值時以台灣TWD為準</param>
+        /// <returns></returns>
+        [HttpPost]        
+        public JsonResult getData(string currency)
+        {          
+            var data = EFHomeRepository.getData(currency);
 
-            return View();
+            return Json(data, JsonRequestBehavior.AllowGet);
         }
     }
 }
