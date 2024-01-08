@@ -1,2 +1,6 @@
 前端使用Vue3 + axios
 後端去串接 open exchange rates 的貨幣資訊
+
+專案結構:
+Application 主要是放商業邏輯，讀取DB的操作都在此
+NewsApi 網站，前端，Controller呼叫Application後，接收結果回傳前端
