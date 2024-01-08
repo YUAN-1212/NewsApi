@@ -7,6 +7,10 @@
         margin: 0;
         padding: 0;
     }
+
+    .row {
+        margin-right: 0px;
+    }
 </style>
 
 <form class="modal-dialog" id="app">
@@ -26,7 +30,7 @@
             </div>
         </div>
         <br>
-        <div class="col-lg-6">
+        <div class="col-lg-6" style="padding-bottom: 10px;">
             <button type="button" class="btn btn-default" v-on:click="change">
                 <span class="glyphicon glyphicon-sort"> 交換</span>
             </button>
@@ -72,7 +76,7 @@
         mounted() {
             console.log('mounted');
             this.getData();
-            this.getDDLCurrencyData2();
+            this.getDDLCurrencyData();
         },
         methods: {
             getData() {
@@ -103,8 +107,8 @@
                         console.log(error);
                     })
             },
-            /** 下拉式選單 */
-            getDDLCurrencyData2() {
+            /** 綁上下拉式選單 */
+            getDDLCurrencyData() {
                 axios
                     .post('/Home/getDDLCurrencyData', 
                         null
@@ -125,13 +129,52 @@
             /** 第一個下拉式選單選擇別的幣別 */
             changeCurrency1() {
                 app1.rate2 = 0; //第二個匯率先歸零
+
+                // 重新取得資料
+                axios
+                    .post('/Home/getData', {
+                        currency: app1.selectedCurrency1,
+                    })
+                    .then(response => {
+                        setTimeout(() => {
+                            if (response.data.result === 'success') {
+                                this.$data.rate1 = 1; //第一個預設都是1
+                                app1.ddlCurrencyDtos = response.data.ddlCurrencyDtos;
+
+                                var filterEmpty = response.data.ddlCurrencyDtos.filter(function (item, index, array) {
+                                    return item.currencyName === app1.selectedCurrency2;
+                                }).map(function (obj) {
+                                    return obj.rate;
+                                });
+
+                                app1.rate2 = filterEmpty;
+                            }
+                        }, 1000);
+                    })
+                    .catch(function (error) { // 请求失败处理
+                        alert(error);
+                        console.log(error);
+                    })
+            },
+            /** 第二個下拉式選單選擇別的幣別 */
+            changeCurrency2() {
+                app1.rate2 = 0; //第二個匯率先歸零
+
+                // 重新覆值
+                var filterEmpty = app1.ddlCurrencyDtos.filter(function (item, index, array) {
+                    return item.currencyName === app1.selectedCurrency2;
+                }).map(function (obj) {
+                    return obj.rate;
+                });
+
+                app1.rate2 = filterEmpty;
             },
             /** 按下交換，上下交換 */
             change() {
                 let currency1_Pre = this.$data.selectedCurrency1; //尚未交換之前-下拉式選單1
                 let currency2_Pre = this.$data.selectedCurrency2; //尚未交換之前-下拉式選單2
-                let rate1_Pre = this.$data.rate1; //尚未交換之前-匯率1
-                let rate2_Pre = this.$data.rate2; //尚未交換之前-匯率2
+                let rate1_Pre = app1.rate1; //尚未交換之前-匯率1
+                let rate2_Pre = app1.rate2; //尚未交換之前-匯率2
 
                 this.$data.selectedCurrency1 = currency2_Pre;
                 this.$data.selectedCurrency2 = currency1_Pre;
@@ -166,7 +209,7 @@
                         })
                 }                
             },
-            /** 按下交換，上下交換 */
+            /** 第一個匯率的Blur事件，需要重新計算幣值 */
             onBlur(e) {
                 let item = e.target.value;
 
